@@ -21,8 +21,8 @@ auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
 
 # user tweets
-user = 'pyrosvestiki'
-limit = 10
+user = 'FT'
+limit = 100
 
 
 #tweets = api.home_timeline()
@@ -44,5 +44,5 @@ for tweet in tweets:
 
 df = pd.DataFrame(data, columns=columns)
 
-df.to_csv('tweets.csv')
+df.to_csv('fttweets.csv')
 print(df)
