@@ -129,7 +129,7 @@ class TwitterClient():
 class AnalyzeTweet():
 
     def __init__(self, tweets):
-       self.tweets = tweets
+       self.tweet = tweet
 
     def get_wordnet_pos(treebank_tag):
         if treebank_tag.startswith('J'):
