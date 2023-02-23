@@ -75,12 +75,13 @@ for tweet in tweets:
 
 df = pd.DataFrame(data, columns=columns)
 
-df.to_csv('fttweets.csv')
+df.to_csv('test.csv')
 print(df)
 #for tweet in tweets:
 #   data.append([tweet.user.screen_name, tweet.full_text])
 
 #df = pd.DataFrame(data, columns=columns)
+
 
 #df.to_csv('fttweets.csv')
 #print(df)
