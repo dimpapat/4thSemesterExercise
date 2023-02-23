@@ -13,6 +13,7 @@ from nltk.corpus import stopwords
 from datetime import datetime
 from nltk import word_tokenize
 from dateutil.parser import parse
+from collections import defaultdict
 
 nltk.download('averaged_perceptron_tagger')
 lemmatizer = WordNetLemmatizer()
@@ -58,7 +59,7 @@ class TwitterClient():
             tweets.append(tweet)
         return tweets
 
-    def save_Tweets(self, tweets):
+    def save_Tweets(self, tweets, filename):
         df = pd.DataFrame(data=[tweet.text for tweet in tweets], columns=['Tweets'])
 
         df['id'] = np.array([tweet.id for tweet in tweets])
@@ -67,7 +68,8 @@ class TwitterClient():
         #df['source'] = np.array([tweet.source for tweet in tweets])
         #df['likes'] = np.array([tweet.favorite_count for tweet in tweets])
         #df['retweets'] = np.array([tweet.retweet_count for tweet in tweets])
-        df.to_csv('test.csv')
+
+        df.to_csv(filename)
 
         return df
 
@@ -160,16 +162,20 @@ class AnalyzeTweet():
 
 
     def count_parts_of_speech(self, msg, lemmatized):
+        counts = defaultdict(int)
         if lemmatized == True:
             new_sentence = self.lemmatize_sentence(msg)
         else:
             new_sentence = msg
         count = 0
         word_and_tags = nltk.pos_tag(new_sentence)
-        counts = Counter(tag for word, tag in word_and_tags)
-        total = sum(counts.values())
-        a = dict((word, float(count) / total) for word, count in counts.items())
-        print(a)
+        for word, tag in word_and_tags:
+            counts[tag] += 1
+        #counts = Counter(tag for word, tag in word_and_tags)
+        #total = sum(counts.values())
+        #a = dict((word, float(count) / total) for word, count in counts.items())
+        #print(counts)
+        return counts
 
     def make_report_of_tweet_len(self, data):
         # frequencies data
@@ -194,7 +200,6 @@ class AnalyzeTweet():
 
     def make_report_of_tweet_stopwords(self, data):
         # frequencies data
-
         # setting the ranges and no. of intervals
         range = (0, 35)
         bins = 100
@@ -213,27 +218,36 @@ class AnalyzeTweet():
         # function to show the plot
         plt.show()
 
+    def make_report_of_tweet_partspeech(self, **data):
+        names = list(data.keys())
+        values = list(data.values())
+        plt.xticks(rotation=90)
+        plt.bar(range(len(data)), values, tick_label=names)
+        plt.show()
 
-twitter_client = TwitterClient("TIME")
-myTweets = twitter_client.readFromFileTweets("test.csv")
-mo = []
+
+
+twitter_client = TwitterClient("FT")
+tweets = twitter_client.get_Tweets()
+twitter_client.save_Tweets(tweets, "FT")
+myTweets = twitter_client.readFromFileTweets("testFT.csv")
+mo = {}
+mo1 = []
+mo2 = []
+mo3 = {}
+counts = defaultdict(int)
 for tweet in myTweets:
     c1 = Tweet(tweet.id, tweet.text, tweet.created_at)
     c2 = AnalyzeTweet(c1)
-    #c2.count_parts_of_speech(c1.text, True)
-    #print(c2.length_of_tweet())
-    #mo.append(c2.length_of_tweet())
-    #print(mo)
-    #print(c1.get_text_of_tweet().split())
-    mo.append(c2.count_stopwords(c1.get_text_of_tweet(), True))
-    print(mo)
-c2.make_report_of_tweet_stopwords(mo)
+    mo2.append(c2.count_stopwords(c1.get_text_of_tweet(), True))
+    mo1.append(c2.length_of_tweet())
 
+    mo3 = c2.count_parts_of_speech(c1.get_text_of_tweet(), True)
+    for key, val in mo3.items():
+        #print(key, val)
+        counts[key] += val
+    #print(counts)
 
-#report = createTwitterStatistics(myTweets)
-#report.mesos_oros_of_tweets(myTweets)
-#print(myTweets)
-#tweet_by_tweet = AnalyzeTweet(myTweets)
-#tweet_by_tweet.count_stopwords_with_lemmatization()
-#print(tweet_by_tweet.len_of_tweet("We are the same Tesing their mice funcrtion"))
-#tweet_by_tweet.date_of_tweet()
+c2.make_report_of_tweet_len(mo1)
+c2.make_report_of_tweet_stopwords(mo2)
+c2.make_report_of_tweet_partspeech(**counts)
